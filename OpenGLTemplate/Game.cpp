@@ -173,7 +173,7 @@ void Game::Initialise()
 
 	// Initialise audio and play background music
 	m_pAudio->Initialise();
-	m_pAudio->Load3DSound("Resources\\Audio\\cw_amen12_137.wav");
+	m_pAudio->Load3DSound("Resources\\Audio\\moo.wav");
 	//m_pAudio->CreateLowPass();
 	//m_pAudio->SetLowPass(m_freq_low);
 	//m_pAudio->CreateFlange();

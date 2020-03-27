@@ -84,7 +84,7 @@ FMOD_RESULT F_CALLBACK DSPCallback(FMOD_DSP_STATE* dsp_state, float* inbuffer, f
 {
 	mydsp_data_t* data = (mydsp_data_t*)dsp_state->plugindata;	//add data into our structure
 
-	auto buffer_size = sizeof(*data->circ_buffer) / sizeof(float);
+	auto buffer_size = 4096 * inchannels;// sizeof(*data->circ_buffer) / sizeof(float);
 	//auto mean_length = buffer_size / inchannels;
 
 
@@ -96,10 +96,9 @@ FMOD_RESULT F_CALLBACK DSPCallback(FMOD_DSP_STATE* dsp_state, float* inbuffer, f
 	{
 		for (int chan = 0; chan < *outchannels; chan++)	//run through out channels length
 		{
-			// FIR Filter by change buffer size
 			int circ_buf_pos = (data->sample_count * inchannels + chan) % buffer_size;
-			outbuffer[samp * *outchannels + chan] = 1.0 * data->circ_buffer[circ_buf_pos]
-				+ 1.0 * inbuffer[samp * inchannels + chan];
+			outbuffer[samp * *outchannels + chan] = 0.5 * data->circ_buffer[circ_buf_pos]
+				+ 0.5 * inbuffer[samp * inchannels + chan];
 			data->circ_buffer[circ_buf_pos] = inbuffer[samp * inchannels + chan];
 		}
 		data->sample_count++;
