@@ -178,8 +178,8 @@ void Game::Initialise()
 	//m_pAudio->SetLowPass(m_freq_low);
 	//m_pAudio->CreateFlange();
 	//m_pAudio->SetFlangeDepth(m_flange_depth);
-	//m_pAudio->LoadMusicStream("Resources\\Audio\\cw_amen12_137.wav");	// Royalty free music from http://www.nosoapradio.us/
-	//m_pAudio->PlayMusicStream();
+	m_pAudio->LoadMusicStream("Resources\\Audio\\cw_amen12_137.wav");	// Royalty free music from http://www.nosoapradio.us/
+	m_pAudio->PlayMusicStream();
 	//m_pAudio->LoadEventSound("Resources\\Audio\\Boing.wav");					// Royalty free sound from freesound.org
 
 	// Initialize Imposter Horse

@@ -45,7 +45,7 @@ float* ApplyZeroPadding(float* data, float* filter)
 	Callback called when DSP is created.   This implementation creates a structure which is attached to the dsp state's 'plugindata' member.
 */FMOD_RESULT F_CALLBACK myDSPCreateCallback(FMOD_DSP_STATE* dsp_state)
 {
-	unsigned int blocksize = 256;
+	unsigned int blocksize = 512;
 	FMOD_RESULT result;
 
 	result = dsp_state->functions->getblocksize(dsp_state, &blocksize);
@@ -85,7 +85,7 @@ FMOD_RESULT F_CALLBACK DSPCallback(FMOD_DSP_STATE* dsp_state, float* inbuffer, f
 	mydsp_data_t* data = (mydsp_data_t*)dsp_state->plugindata;	//add data into our structure
 
 	auto buffer_size = sizeof(*data->circ_buffer) / sizeof(float);
-	auto mean_length = buffer_size / inchannels;
+	//auto mean_length = buffer_size / inchannels;
 
 
 	//ApplyZeroPadding(inbuffer, mixed_filt);
@@ -98,9 +98,9 @@ FMOD_RESULT F_CALLBACK DSPCallback(FMOD_DSP_STATE* dsp_state, float* inbuffer, f
 		{
 			// FIR Filter by change buffer size
 			int circ_buf_pos = (data->sample_count * inchannels + chan) % buffer_size;
-			outbuffer[samp * *outchannels + chan] = 0.5 * data->circ_buffer[circ_buf_pos]
-				+ 0.5 * inbuffer[samp * inchannels + chan];
-			data->circ_buffer[circ_buf_pos] = outbuffer[samp * *outchannels + chan];
+			outbuffer[samp * *outchannels + chan] = 1.0 * data->circ_buffer[circ_buf_pos]
+				+ 1.0 * inbuffer[samp * inchannels + chan];
+			data->circ_buffer[circ_buf_pos] = inbuffer[samp * inchannels + chan];
 		}
 		data->sample_count++;
 	}
@@ -249,8 +249,6 @@ bool CAudio::Initialise()
 
 		if (result != FMOD_OK) return false;
 	}
-
-	return true;
 
 	return true;
 }
