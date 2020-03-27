@@ -1,0 +1,5 @@
+﻿  Game.cpp
+C:\Users\jihae\Desktop\MSc_Games\DSP\3DSound\OpenGLTemplate\Game.cpp(330,19): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\jihae\Desktop\MSc_Games\DSP\3DSound\OpenGLTemplate\Game.cpp(555,25): warning C4305: '-=': truncation from 'double' to 'float'
+C:\Users\jihae\Desktop\MSc_Games\DSP\3DSound\OpenGLTemplate\Game.cpp(561,25): warning C4305: '+=': truncation from 'double' to 'float'
+  OpenGLTemplate.vcxproj -> C:\Users\jihae\Desktop\MSc_Games\DSP\3DSound\Debug\OpenGLTemplate.exe
