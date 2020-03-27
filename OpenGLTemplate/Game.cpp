@@ -174,8 +174,8 @@ void Game::Initialise()
 	// Initialise audio and play background music
 	m_pAudio->Initialise();
 	m_pAudio->Load3DSound("Resources\\Audio\\moo.wav");
-	//m_pAudio->CreateLowPass();
-	//m_pAudio->SetLowPass(m_freq_low);
+	m_pAudio->CreateLowPass();
+	m_pAudio->SetLowPass(m_freq_low);
 	m_pAudio->CreateFlange();
 	m_pAudio->SetFlangeDepth(m_flange_depth);
 	//m_pAudio->PlayMusicStream();
@@ -366,11 +366,11 @@ void Game::DisplayFrameRate()
 	m_pFtFont->Render(width * 3 / 4, height - 80, 20, "'X' : player/horse toggle");
 	fontProgram->SetUniform("vColour", glm::vec4(0.0f, 0.2f, 1.0f, 1.0f));
 	m_pFtFont->Render(20, height - 60, 20, "'P' : play spatialized sound");
-	m_pFtFont->Render(20, height - 100, 20, "Lowpass freq: %f", m_freq_low);
-	fontProgram->SetUniform("vColour", glm::vec4(1.0f, 0.2f, 0.0f, 1.0f));
-	m_pFtFont->Render(20, height - 120, 20, "'P' : play spatialized sound");
-	m_pFtFont->Render(20, height - 140, 20, "Flange Depth: %f", m_flange_depth);
-
+	fontProgram->SetUniform("vColour", glm::vec4(1.0f, 0.2f, 1.0f, 1.0f));
+	m_pFtFont->Render(20, height - 100, 20, "'2' '3' : control lowpass");
+	m_pFtFont->Render(20, height - 120, 20, "Lowpass freq: %f", m_freq_low);
+	m_pFtFont->Render(20, height - 140, 20, "'4' '5' : control flange depth");
+	m_pFtFont->Render(20, height - 160, 20, "Flange Depth: %f", m_flange_depth);
 
 	// Increase the elapsed time and frame counter
 	m_elapsedTime += m_dt;
