@@ -28,11 +28,6 @@ public:
 
 	void CreateObstacle(Wall* wall);
 
-	bool CreateLowPass();
-	bool SetLowPass(float freq);
-	bool CreateFlange();
-	bool SetFlangeDepth(float depth);
-
 
 private:
 	FMOD_VECTOR listenerVelocity, listenerUp, listenerForward, listenerPos, soundPosition, soundVelocity;
@@ -45,8 +40,6 @@ private:
 	FMOD::Channel *m_musicChannel;
 	FMOD::ChannelGroup* m_mastergroup;
 	FMOD::DSP *m_dsp;
-	FMOD::DSP* m_lowpass;
-	FMOD::DSP* m_flange;
 
 	bool bypass;
 	void ToFMODVector(glm::vec3 vec, FMOD_VECTOR* fVec);
@@ -61,7 +54,5 @@ typedef struct
 	int   sample_count;
 	int   channels;
 
-	float* b_filter1;
-	float* b_filter2;
 
 } mydsp_data_t;

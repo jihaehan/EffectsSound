@@ -60,14 +60,6 @@ float* ApplyZeroPadding(float* data, float* filter)
 	data->volume_linear = 1.0f;
 	data->speed_percent = 1.0f;
 	data->sample_count = blocksize;
-	data->b_filter1 = { new float[21]{ -0.00349319,  0.00047716,  0.00459594,  0.00871522,  0.0126823,   0.01634645,
-		0.01956573,  0.02221357,  0.02418469,  0.02540006,  0.02581071,  0.02540006,
-		0.02418469,  0.02221357,  0.01956573,  0.01634645,  0.0126823,   0.00871522,
-		0.00459594,  0.00047716, -0.00349319} };
-	data->b_filter2 = { new float[21] {-0.01911611, -0.02526179, -0.02772793, -0.02595434, -0.02006462, -0.01086989,
-		0.0002479,   0.01155558,  0.02125468,  0.02778399,  0.03008517,  0.02778399,
-		0.02125468,  0.01155558,  0.0002479, -0.01086989, -0.02006462, -0.02595434,
-		-0.02772793, -0.02526179, -0.01911611} };
 
 	data->circ_buffer = (float*)malloc(blocksize * 8 * sizeof(float));      // *8 = maximum size allowing room for 7.1.   Could ask dsp_state->functions->getspeakermode for the right speakermode to get real speaker count.
 	if (!data->circ_buffer)
@@ -85,10 +77,7 @@ FMOD_RESULT F_CALLBACK DSPCallback(FMOD_DSP_STATE* dsp_state, float* inbuffer, f
 	mydsp_data_t* data = (mydsp_data_t*)dsp_state->plugindata;	//add data into our structure
 
 	auto buffer_size = 4096 * inchannels;// sizeof(*data->circ_buffer) / sizeof(float);
-	//auto mean_length = buffer_size / inchannels;
 
-
-	//ApplyZeroPadding(inbuffer, mixed_filt);
 
 	if (buffer_size <= 0) return FMOD_ERR_MEMORY;
 
@@ -315,7 +304,7 @@ bool CAudio::Load3DSound(char* filename)
 
 	//set 3D settings for spatialized sound
 	result = m_FmodSystem->set3DSettings(1.0, 0.5, 1.0);
-	m_eventSound->set3DMinMaxDistance(1.f, 5000.f);
+	m_eventSound->set3DMinMaxDistance(1.f, 500.f);
 
 	return true;
 
@@ -374,51 +363,6 @@ void CAudio::Update3DSound(glm::vec3 position, glm::vec3 velocity)
 	soundVelocity.z = velocity.z;
 
 	result = m_musicChannel->set3DAttributes(&soundPosition, &soundVelocity);
-}
-
-
-bool CAudio::CreateLowPass()
-{
-	result = m_FmodSystem->createDSPByType(FMOD_DSP_TYPE_LOWPASS, &m_lowpass);
-	result = m_musicChannel->addDSP(0, m_lowpass);
-
-	FmodErrorCheck(result);
-	if (result != FMOD_OK)
-		return false;
-
-	return true;
-}
-
-bool CAudio::SetLowPass(float freq)
-{
-	result = m_lowpass->setParameterFloat(FMOD_DSP_LOWPASS_CUTOFF, freq);
-	FmodErrorCheck(result);
-	if (result != FMOD_OK)
-		return false;
-
-	return true;
-}
-
-bool CAudio::CreateFlange()
-{
-	result = m_FmodSystem->createDSPByType(FMOD_DSP_TYPE_FLANGE, &m_flange);
-	result = m_musicChannel->addDSP(0, m_flange);
-
-	FmodErrorCheck(result);
-	if (result != FMOD_OK)
-		return false;
-
-	return true;
-}
-
-bool CAudio::SetFlangeDepth(float depth)
-{
-	result = m_flange->setParameterFloat(FMOD_DSP_FLANGE_DEPTH, depth);
-	FmodErrorCheck(result);
-	if (result != FMOD_OK)
-		return false;
-
-	return true;
 }
 
 void CAudio::CreateObstacle(Wall* wall)

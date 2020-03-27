@@ -58,8 +58,6 @@ Game::Game()
 	m_speed_percent = 1.f;
 	m_filterswitch = true;
 	m_movePlayer = false;
-	m_freq_low = 2000.f;
-	m_flange_depth = 0.5f;
 }
 
 // Destructor
@@ -173,13 +171,10 @@ void Game::Initialise()
 
 	// Initialise audio and play background music
 	m_pAudio->Initialise();
-	m_pAudio->Load3DSound("Resources\\Audio\\moo.wav");
-	//m_pAudio->CreateLowPass();
-	//m_pAudio->SetLowPass(m_freq_low);
-	//m_pAudio->CreateFlange();
-	//m_pAudio->SetFlangeDepth(m_flange_depth);
-	m_pAudio->LoadMusicStream("Resources\\Audio\\cw_amen12_137.wav");	// Royalty free music from http://www.nosoapradio.us/
-	m_pAudio->PlayMusicStream();
+	m_pAudio->Load3DSound("Resources\\Audio\\cw_amen12_137.wav");
+
+	//m_pAudio->LoadMusicStream("Resources\\Audio\\cw_amen12_137.wav");	// Royalty free music from http://www.nosoapradio.us/
+	//m_pAudio->PlayMusicStream();
 	//m_pAudio->LoadEventSound("Resources\\Audio\\Boing.wav");					// Royalty free sound from freesound.org
 
 	// Initialize Imposter Horse
@@ -365,12 +360,7 @@ void Game::DisplayFrameRate()
 	m_pFtFont->Render(width * 3 / 4, height - 60, 20, "'M' : speed up");
 	m_pFtFont->Render(width * 3 / 4, height - 80, 20, "'X' : player/horse toggle");
 	fontProgram->SetUniform("vColour", glm::vec4(0.0f, 0.2f, 1.0f, 1.0f));
-	m_pFtFont->Render(20, height - 60, 20, "'P' : play spatialized sound");
-	fontProgram->SetUniform("vColour", glm::vec4(1.0f, 0.2f, 1.0f, 1.0f));
-	m_pFtFont->Render(20, height - 100, 20, "'2' '3' : control lowpass");
-	m_pFtFont->Render(20, height - 120, 20, "Lowpass freq: %f", m_freq_low);
-	m_pFtFont->Render(20, height - 140, 20, "'4' '5' : control flange depth");
-	m_pFtFont->Render(20, height - 160, 20, "Flange Depth: %f", m_flange_depth);
+	m_pFtFont->Render(20, height - 60, 20, "'P' : play sound event");
 
 	// Increase the elapsed time and frame counter
 	m_elapsedTime += m_dt;
@@ -389,19 +379,19 @@ void Game::DisplayFrameRate()
 
 	if (m_framesPerSecond > 0) {
 		// Use the font shader program and render the text
-		fontProgram->SetUniform("vColour", glm::vec4(1.0f, 0.0f, 1.0f, 1.0f));
-		m_pFtFont->Render(20, height - 20, 20, "Speed Factor: %f", m_speed_percent);
+		//fontProgram->SetUniform("vColour", glm::vec4(1.0f, 0.0f, 1.0f, 1.0f));
+		//m_pFtFont->Render(20, height - 20, 20, "Speed Factor: %f", m_speed_percent);
 	}
 
 	if (m_filterswitch == true)
 	{
 		fontProgram->SetUniform("vColour", glm::vec4(0.3f, 1.0f, 0.1f, 1.0f));
-		m_pFtFont->Render(20, height - 40, 20, "Filter ON");
+		m_pFtFont->Render(20, height - 40, 20, "Flange ON");
 	}
 	else
 	{
 		fontProgram->SetUniform("vColour", glm::vec4(1.0f, 0.1f, 0.1f, 1.0f));
-		m_pFtFont->Render(20, height - 40, 20, "Filter OFF");
+		m_pFtFont->Render(20, height - 40, 20, "Flange OFF");
 	}
 
 	if (m_movePlayer) {
@@ -538,30 +528,6 @@ LRESULT Game::ProcessEvents(HWND window,UINT message, WPARAM w_param, LPARAM l_p
 			m_movePlayer = !m_movePlayer;
 			m_pImposterHorse->SetMoveHorse(!m_movePlayer);
 			m_pCamera->SetMoveCamera(m_movePlayer);
-			break;
-		case '2':
-			m_freq_low -= 100;
-			if (m_freq_low < 0)
-				m_freq_low = 0;
-			m_pAudio->SetLowPass(m_freq_low);
-			break;
-		case '3':
-			m_freq_low += 100;
-			if (m_freq_low > 2000)
-				m_freq_low = 2000;
-			m_pAudio->SetLowPass(m_freq_low);
-			break;
-		case '4':
-			m_flange_depth -= 0.1;
-			if (m_flange_depth < 0)
-				m_flange_depth = 0;
-			m_pAudio->SetFlangeDepth(m_flange_depth);
-			break;
-		case '5':
-			m_flange_depth += 0.1;
-			if (m_flange_depth > 1.0)
-				m_flange_depth = 1.0;
-			m_pAudio->SetFlangeDepth(m_flange_depth);
 			break;
 		}
 		break;

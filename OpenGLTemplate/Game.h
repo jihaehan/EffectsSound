@@ -47,8 +47,6 @@ private:
 	float m_speed_percent;
 	bool m_filterswitch;
 	bool m_movePlayer;
-	float m_freq_low;
-	float m_flange_depth;
 
 public:
 	Game();
