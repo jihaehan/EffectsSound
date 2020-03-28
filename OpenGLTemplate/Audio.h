@@ -22,6 +22,7 @@ public:
 	void FilterSwitch();	
 	void SpeedUp(float &speedpercent);
 	void SpeedDown(float &speedpercent);
+
 	void Update(float dt);
 	void UpdateListener(glm::vec3 position, glm::vec3 velocity, glm::vec3 forward, glm::vec3 up);
 	void Update3DSound(glm::vec3 posiiton, glm::vec3 velocity);
@@ -46,6 +47,7 @@ private:
 
 
 };
+
 typedef struct
 {
 	float* circ_buffer;

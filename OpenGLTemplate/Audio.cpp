@@ -41,11 +41,11 @@ float* ApplyZeroPadding(float* data, float* filter)
 	return zeroPaddedData;
 }
 
-/*
-	Callback called when DSP is created.   This implementation creates a structure which is attached to the dsp state's 'plugindata' member.
-*/FMOD_RESULT F_CALLBACK myDSPCreateCallback(FMOD_DSP_STATE* dsp_state)
+//Callback called when DSP is created.  
+//This implementation creates a structure which is attached to the dsp state's 'plugindata' member.
+FMOD_RESULT F_CALLBACK myDSPCreateCallback(FMOD_DSP_STATE* dsp_state)
 {
-	unsigned int blocksize = 512;
+	unsigned int blocksize = 512; //size of sample	
 	FMOD_RESULT result;
 
 	result = dsp_state->functions->getblocksize(dsp_state, &blocksize);
@@ -56,12 +56,14 @@ float* ApplyZeroPadding(float* data, float* filter)
 	{
 		return FMOD_ERR_MEMORY;
 	}
+	//sets initial values to the fields in mydsp_data_t struct
 	dsp_state->plugindata = data;
 	data->volume_linear = 1.0f;
 	data->speed_percent = 1.0f;
 	data->sample_count = blocksize;
 
-	data->circ_buffer = (float*)malloc(blocksize * 8 * sizeof(float));      // *8 = maximum size allowing room for 7.1.   Could ask dsp_state->functions->getspeakermode for the right speakermode to get real speaker count.
+	data->circ_buffer = (float*)malloc(blocksize * 8 * sizeof(float));      
+	// *8 = maximum size allowing room for 7.1.   Could ask dsp_state->functions->getspeakermode for the right speakermode to get real speaker count.
 	if (!data->circ_buffer)
 	{
 		return FMOD_ERR_MEMORY;
@@ -71,23 +73,25 @@ float* ApplyZeroPadding(float* data, float* filter)
 }
 
 
-// DSP callback
+// Flange DSP callback
 FMOD_RESULT F_CALLBACK DSPCallback(FMOD_DSP_STATE* dsp_state, float* inbuffer, float* outbuffer, unsigned int length, int inchannels, int* outchannels)
 {
 	mydsp_data_t* data = (mydsp_data_t*)dsp_state->plugindata;	//add data into our structure
 
-	auto buffer_size = 4096 * inchannels;// sizeof(*data->circ_buffer) / sizeof(float);
+	auto buffer_size = 4096 * inchannels; //sets the size of the buffer
 
-
-	if (buffer_size <= 0) return FMOD_ERR_MEMORY;
+	if (buffer_size <= 0) return FMOD_ERR_MEMORY; //checks for error
 
 	for (unsigned int samp = 0; samp < length; samp++)	//run through sample length				
 	{
 		for (int chan = 0; chan < *outchannels; chan++)	//run through out channels length
 		{
+			//store the new sample as circ_buf_pos
 			int circ_buf_pos = (data->sample_count * inchannels + chan) % buffer_size;
+			//use the delayed sample in the outbuffer
 			outbuffer[samp * *outchannels + chan] = 0.5 * data->circ_buffer[circ_buf_pos]
 				+ 0.5 * inbuffer[samp * inchannels + chan];
+			//store the new sample in the inbuffer
 			data->circ_buffer[circ_buf_pos] = inbuffer[samp * inchannels + chan];
 		}
 		data->sample_count++;
@@ -96,6 +100,7 @@ FMOD_RESULT F_CALLBACK DSPCallback(FMOD_DSP_STATE* dsp_state, float* inbuffer, f
 	return FMOD_OK;
 }
 
+//release the custom DSPcallback
 FMOD_RESULT F_CALLBACK myDSPReleaseCallback(FMOD_DSP_STATE* dsp_state)
 {
 	if (dsp_state->plugindata)
@@ -104,7 +109,7 @@ FMOD_RESULT F_CALLBACK myDSPReleaseCallback(FMOD_DSP_STATE* dsp_state)
 
 		if (data->circ_buffer)
 		{
-			free(data->circ_buffer);
+			free(data->circ_buffer); //frees the data in the circular buffer 
 		}
 
 		free(data);
@@ -113,6 +118,7 @@ FMOD_RESULT F_CALLBACK myDSPReleaseCallback(FMOD_DSP_STATE* dsp_state)
 	return FMOD_OK;
 }
 
+//set the data parameter for mydsp_data_t struct
 FMOD_RESULT F_CALLBACK myDSPGetParameterDataCallback(FMOD_DSP_STATE* dsp_state, int index, void** data, unsigned int* length, char*)
 {
 	if (index == 0)
@@ -133,6 +139,7 @@ FMOD_RESULT F_CALLBACK myDSPGetParameterDataCallback(FMOD_DSP_STATE* dsp_state, 
 	return FMOD_ERR_INVALID_PARAM;
 }
 
+//set the float parameter for 'speed_percent' from the mydsp_data_t struct
 FMOD_RESULT F_CALLBACK myDSPSetParameterFloatCallback(FMOD_DSP_STATE* dsp_state, int index, float value)
 {
 	if (index == 1)
@@ -147,6 +154,7 @@ FMOD_RESULT F_CALLBACK myDSPSetParameterFloatCallback(FMOD_DSP_STATE* dsp_state,
 	return FMOD_ERR_INVALID_PARAM;
 }
 
+//get the float parameter for 'speed_percent' from the mydsp_data_t struct
 FMOD_RESULT F_CALLBACK myDSPGetParameterFloatCallback(FMOD_DSP_STATE* dsp_state, int index, float* value, char* valstr)
 {
 	if (index == 1)
@@ -168,6 +176,7 @@ FMOD_RESULT F_CALLBACK myDSPGetParameterFloatCallback(FMOD_DSP_STATE* dsp_state,
 
 CAudio::CAudio()
 {
+	//Initialize 3D attributes of sound source (horse) and player (camera)
 	listenerVelocity.x = 1;
 	listenerVelocity.y = 1;
 	listenerVelocity.z = 1;
@@ -205,7 +214,7 @@ bool CAudio::Initialise()
 	if (result != FMOD_OK) 
 		return false;
 	
-	// Create the DSP effect
+	// Create the Flange DSP effect
 	{
 		FMOD_DSP_DESCRIPTION dspdesc;
 		memset(&dspdesc, 0, sizeof(dspdesc));
@@ -214,7 +223,8 @@ bool CAudio::Initialise()
 		FMOD_DSP_PARAMETER_DESC* paramdesc[2] =
 		{
 			&wavedata_desc,
-			&speed_desc
+			&speed_desc			//note that the speed parameter is not currently used for our flange effect, 
+								//but is left here nevertheless in case of future implementation
 		};
 
 		FMOD_DSP_INIT_PARAMDESC_DATA(wavedata_desc, "wave data", "", "wave data", FMOD_DSP_PARAMETER_DATA_TYPE_USER);
@@ -288,28 +298,29 @@ bool CAudio::PlayMusicStream()
 
 	m_musicChannel->addDSP(0, m_dsp);
 
-
 	return true;
 }
 
 
-
+// Load a 3D sound event (with the horse as the sound source)
 bool CAudio::Load3DSound(char* filename)
 {
-
+	//load sound as spatialized sound (FMOD_3D)
 	result = m_FmodSystem->createSound(filename, FMOD_3D, 0, &m_eventSound);
 	FmodErrorCheck(result);
 	if (result != FMOD_OK)
 		return false;
 
-	//set 3D settings for spatialized sound
+	//set 3D settings for spatialized sound, ie doppler scale, distance factor, roll-off scale
 	result = m_FmodSystem->set3DSettings(1.0, 0.5, 1.0);
+	//set minimum and maximum audible distance for sound
 	m_eventSound->set3DMinMaxDistance(1.f, 500.f);
 
 	return true;
 
 }
 
+// Play a 3D sound event (with the horse as a sound source)
 void CAudio::Play3DSound()
 {
 	// Play the sound
@@ -317,17 +328,18 @@ void CAudio::Play3DSound()
 	FMOD_VECTOR pos = { 0.0f, 0.0f, 0.0f };
 	FMOD_VECTOR vel = { 0.0f, 0.0f, 0.0f };
 
-	result = m_musicChannel->set3DAttributes(&pos, &vel);	 // The the 3D position of the sound
+	// The 3D position and velocity of the sound
+	result = m_musicChannel->set3DAttributes(&pos, &vel);
+	// Set the volume of the sound
 	result = m_musicChannel->setVolume(1.0);
 
+	//add custom flange effect to the sound event
 	m_musicChannel->addDSP(0, m_dsp);
-	//m_musicChannel->addDSP(0, m_flange);
-	//m_musicChannel->addDSP(0, m_lowpass);
-
 
 	FmodErrorCheck(result);
 }
 
+//Update the player's velocity, position, forward vector, and upvector 
 void CAudio::UpdateListener(glm::vec3 position, glm::vec3 velocity, glm::vec3 forward, glm::vec3 up)
 {
 
@@ -347,11 +359,13 @@ void CAudio::UpdateListener(glm::vec3 position, glm::vec3 velocity, glm::vec3 fo
 	listenerUp.y = up.y;
 	listenerUp.z = up.z;
 
+	//Feed information to FMOD about the listener's pos/vel/forward/up vector
 	result = m_FmodSystem->set3DListenerAttributes(0, &listenerPos, &listenerVelocity, &listenerForward, &listenerUp);
 	FmodErrorCheck(result);
 
 }
 
+//Update the position and velocity of the sound source, ie whatever the horse is saying
 void CAudio::Update3DSound(glm::vec3 position, glm::vec3 velocity)
 {
 	soundPosition.x = position.x;
@@ -362,12 +376,14 @@ void CAudio::Update3DSound(glm::vec3 position, glm::vec3 velocity)
 	soundVelocity.y = velocity.y;
 	soundVelocity.z = velocity.z;
 
+	//Feed information to FMOD about the 3D attributes of the sound source (ie the horse)
 	result = m_musicChannel->set3DAttributes(&soundPosition, &soundVelocity);
 }
 
+//Creates an obstacle in 3D space where the sound is obstructed and occluded
 void CAudio::CreateObstacle(Wall* wall)
 {
-	FMOD_VECTOR wall1[4];
+	FMOD_VECTOR wall1[4]; //create a wall as the sound obstacle
 
 	ToFMODVector(wall->getVertex(0), &wall1[0]);
 	ToFMODVector(wall->getVertex(1), &wall1[1]);
@@ -384,7 +400,6 @@ void CAudio::CreateObstacle(Wall* wall)
 
 	FMOD_VECTOR wallPosition;
 	glm::vec3 position = wall->getVertex(0);
-	//glm::vec3 position = glm::vec3(wall1[2].x - wall1[0].x, wall1[1].y - wall1[0].y, wall1[0].z);
 
 	ToFMODVector(position, &wallPosition);
 
@@ -392,7 +407,7 @@ void CAudio::CreateObstacle(Wall* wall)
 	geometry->setActive(TRUE);
 }
 
-
+//Helper function to convert vectors into FMOD vectors
 void CAudio::ToFMODVector(glm::vec3 vec, FMOD_VECTOR* fVec)
 {
 	fVec->x = vec.x;
@@ -400,6 +415,7 @@ void CAudio::ToFMODVector(glm::vec3 vec, FMOD_VECTOR* fVec)
 	fVec->z = vec.z;
 }
 
+//General update method for audio in the game
 void CAudio::Update(float dt)
 {
 	m_FmodSystem->update();
@@ -407,9 +423,9 @@ void CAudio::Update(float dt)
 	result = m_dsp->getBypass(&bypass);
 
 	FmodErrorCheck(result);
-
 }
 
+//turns the flange filter on and off in the game scene by setting a bypass
 void CAudio::FilterSwitch()
 {
 	if (bypass == true)
@@ -420,8 +436,12 @@ void CAudio::FilterSwitch()
 	
 }
 
+// adjusts the speed of the horse (slows down) and feeds information to mydsp_data_t
+// NOTE: this callback is not needed for our flange effect, but is left here 
+// nevertheless in case of further implementation. 
 void CAudio::SpeedDown(float &speedpercent)
 {
+	//gets the float parameter 'speedpercent' in mydsp_data_t
 	result = m_dsp->getParameterFloat(1, &speedpercent, 0, 0);
 	FmodErrorCheck(result);
 
@@ -430,13 +450,14 @@ void CAudio::SpeedDown(float &speedpercent)
 		speedpercent -= 0.05f;
 	}
 
+	//sets the float parameter 'speedpercent' in mydsp_data_t
 	result = m_dsp->setParameterFloat(1, speedpercent);
 	FmodErrorCheck(result);
-
 }
 
 void CAudio::SpeedUp(float &speedpercent)
 {
+	//gets the float parameter 'speedpercent' in mydsp_data_t
 	result = m_dsp->getParameterFloat(1, &speedpercent, 0, 0);
 	FmodErrorCheck(result);
 
@@ -445,6 +466,7 @@ void CAudio::SpeedUp(float &speedpercent)
 		speedpercent += 0.05f;
 	}
 
+	//sets the float parameter 'speedpercent' in mydsp_data_t
 	result = m_dsp->setParameterFloat(1, speedpercent);
 	FmodErrorCheck(result);
 

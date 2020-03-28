@@ -175,7 +175,7 @@ void Game::Initialise()
 
 	//m_pAudio->LoadMusicStream("Resources\\Audio\\cw_amen12_137.wav");	// Royalty free music from http://www.nosoapradio.us/
 	//m_pAudio->PlayMusicStream();
-	//m_pAudio->LoadEventSound("Resources\\Audio\\Boing.wav");					// Royalty free sound from freesound.org
+	//m_pAudio->LoadEventSound("Resources\\Audio\\Boing.wav");	// Royalty free sound from freesound.org
 
 	// Initialize Imposter Horse
 	m_pImposterHorse->Initialise(m_pHorseMesh);
@@ -321,8 +321,9 @@ void Game::Update()
 	// Updates camera speed
 	//m_pCamera->Speed(m_speed_percent);
 
-
+	//general audio update
 	m_pAudio->Update(m_dt);
+
 	//update controllable imposter horse
 	m_pImposterHorse->Update(m_dt);
 	m_pImposterHorse->Speed(m_speed_percent);
