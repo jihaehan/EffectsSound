@@ -14,10 +14,10 @@ void FmodErrorCheck(FMOD_RESULT result)
 	}
 }
 
-float* ApplyZeroPadding(float* data, float* filter)
+/*Function that applied zero padding to a buffer, based on filter and it's size*/
+float* ApplyZeroPadding(float* data, int filterSize)
 {
-	//p = ceil((f-1) / 2)
-	int filterSize = sizeof(*filter) / sizeof(float);
+	//to calculate zero padding: p = ceil((f-1) / 2)
 	int dataSize = sizeof(*data) / sizeof(float);
 	int p = ceil((filterSize - 1) / 2);
 	float* zeroPaddedData = new float[dataSize + p * 2];
@@ -25,18 +25,22 @@ float* ApplyZeroPadding(float* data, float* filter)
 	//calculate data size
 	int zeroPaddedDataSize = sizeof(*zeroPaddedData) / sizeof(float);
 
+	//prepend zeros
 	for (int i = 0; i < p; i++) {
 		zeroPaddedData[i] = 0;
 	}
 
+	//copy over original data
 	for (int i = p; i < zeroPaddedDataSize - p; i++) {
 		zeroPaddedData[i] = data[i - p];
 	}
 
+	//append zeros
 	for (int i = zeroPaddedDataSize - p; i < zeroPaddedDataSize; i++) {
 		zeroPaddedData[i] = 0;
 	}
 
+	//set pointer to new data array
 	data = zeroPaddedData;
 	return zeroPaddedData;
 }
@@ -48,6 +52,7 @@ FMOD_RESULT F_CALLBACK myDSPCreateCallback(FMOD_DSP_STATE* dsp_state)
 	unsigned int blocksize = 512; //size of sample	
 	FMOD_RESULT result;
 
+	//check for error
 	result = dsp_state->functions->getblocksize(dsp_state, &blocksize);
 	FmodErrorCheck(result);
 
@@ -61,7 +66,6 @@ FMOD_RESULT F_CALLBACK myDSPCreateCallback(FMOD_DSP_STATE* dsp_state)
 	data->volume_linear = 1.0f;
 	data->speed_percent = 1.0f;
 	data->sample_count = blocksize;
-
 	data->circ_buffer = (float*)malloc(blocksize * 8 * sizeof(float));      
 	// *8 = maximum size allowing room for 7.1.   Could ask dsp_state->functions->getspeakermode for the right speakermode to get real speaker count.
 	if (!data->circ_buffer)
