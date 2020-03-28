@@ -5,17 +5,23 @@
 #include "Shaders.h"
 #include "Camera.h"
 
+//Hello Lady or Gentleman. I am the Imposter horse. 
+//This is where I shall tell you more about myself. 
+//Look at ImposterHorse.cpp for more details on methods!
+
 class CImposterHorse
 {
 public:
 	CImposterHorse();
 	~CImposterHorse();
 	
+	//Gets 3D attributes of imposter horse
 	glm::vec3 GetPosition() const { return m_position; };
 	glm::vec3 GetUp() const { return m_up_vector; };
 	glm::vec3 GetForward() const { return m_forward_vector; };
 	glm::vec3 GetView() const { return m_position + m_forward_vector; }
 
+	//Methods to integrate imposter horse into the game scene
 	void Initialise(COpenAssetImportMesh* object);
 	void Render(glutil::MatrixStack playerStack, CShaderProgram* shaderProgram, CCamera* camera);
 	void Update(double dt);
@@ -24,12 +30,20 @@ public:
 	void Strafe(double direction);
 	void Speed(float& speedfactor);
 	void SetMoveHorse(bool shouldMove);
+
 private:
+
+	//The mesh to be rendered as the imposter horse
 	COpenAssetImportMesh* m_imposter_horse{};
+
+	//3D attributes of imposter horse
 	glm::vec3 m_position{ 0.f, 0.0f, 100.f };
 	glm::vec3 m_strafe_vector{ 0.f, 0.f, -1.f };
 	glm::vec3 m_forward_vector{ -1.f, 0.f, 0.f };
 	glm::vec3 m_up_vector{ 0.f, 1.0f, 0.0f };
+
+	//speed of movement for imposter horse
 	float m_speed = 0.05f;
+	//whether imposter horse can be moved through key inputs
 	bool moveHorse;
 };
